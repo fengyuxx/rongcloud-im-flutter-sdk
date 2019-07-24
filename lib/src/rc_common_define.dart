@@ -36,6 +36,7 @@ class RCMethodKey {
 
   static const String SetMessageReceivedStatus = 'setMessageReceivedStatus';
   static const String SetMessageSentStatus = 'setMessageSentStatus';
+  static const String SendReadReceiptMessage = 'sendReadReceiptMessage';
 }
 
 //callback list //native 会触发此方法

@@ -89,6 +89,8 @@
         [self setMessageSentStatus:call.arguments result:result];
     }else if([RCMethodKeySetMessageReceivedStatus isEqualToString:call.method]){
         [self setMessageReceivedStatus:call.arguments result:result];
+    }else if([RCMethodKeySendReadReceiptMessage isEqualToString:call.method]){
+        [self sendReadReceiptMessage:call.arguments result:result];
     }else {
         result(FlutterMethodNotImplemented);
     }
@@ -547,6 +549,36 @@
         result([NSNumber numberWithBool:rc]);
     }
 }
+
+//- (void)sendReadReceiptMessage:(RCConversationType)conversationType
+//                      targetId:(NSString *)targetId
+//                          time:(long long)timestamp
+//                       success:(void (^)(void))successBlock
+//                         error:(void (^)(RCErrorCode nErrorCode))errorBlock;
+
+- (void)sendReadReceiptMessage:(id)arg result:(FlutterResult)result{
+    NSString *LOG_TAG =  @"sendReadReceiptMessage";
+    [RCLog i:[NSString stringWithFormat:@"%@ start param:%@",LOG_TAG,arg]];
+    if ([arg isKindOfClass:[NSDictionary class]]) {
+    
+        NSDictionary *param = (NSDictionary *)arg;
+        RCConversationType conversationType = (RCConversationType)[param[@"conversationType"] intValue];
+        NSString *targetId = param[@"targetId"];
+        long long timestamp = [param[@"timestamp"] longLongValue];
+        
+        [[RCIMClient sharedRCIMClient] sendReadReceiptMessage:conversationType targetId:targetId time:timestamp success:^{
+            NSMutableDictionary *callbackDic = [NSMutableDictionary new];
+            [callbackDic setObject:@(0) forKey:@"code"];
+            result(callbackDic);
+        } error:^(RCErrorCode nErrorCode) {
+            [RCLog e:[NSString stringWithFormat:@"%@ %@",LOG_TAG,@(nErrorCode)]];
+            NSMutableDictionary *callbackDic = [NSMutableDictionary new];
+            [callbackDic setObject:@(nErrorCode) forKey:@"code"];
+            result(callbackDic);
+        }];
+    }
+}
+
 
 #pragma mark -- 未读数
 

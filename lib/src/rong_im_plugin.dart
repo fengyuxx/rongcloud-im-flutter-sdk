@@ -374,22 +374,34 @@ class RongcloudImPlugin {
   }
 
   static Future<bool> setMessageSentStatus(int messageId, int sentStatus) async {
-    Map map = {
+    Map params = {
       "messageId": messageId,
       "sentStatus": sentStatus,
     };
 
-    bool rc = await _channel.invokeMethod(RCMethodKey.SetMessageSentStatus, map);
+    bool rc = await _channel.invokeMethod(RCMethodKey.SetMessageSentStatus, params);
     return rc;
   }
 
   static Future<bool> setMessageReceivedStatus(int messageId, int receivedStatus) async {
-    Map map = {
+    Map params = {
       "messageId": messageId,
       "receivedStatus": receivedStatus,
     };
-    bool rc = await _channel.invokeMethod(RCMethodKey.SetMessageReceivedStatus, map);
+    bool rc = await _channel.invokeMethod(RCMethodKey.SetMessageReceivedStatus, params);
     return rc;
+  }
+
+  static Future sendReadReceiptMessage(RCConversationType conversationType, String targetId, DateTime sentAt, [Function(int code) finished]) async{
+    Map params = {
+      "conversationType": conversationType,
+      "targetId": targetId,
+      "timestamp": sentAt.millisecondsSinceEpoch,
+    };
+    Map map = await _channel.invokeMethod(RCMethodKey.SendReadReceiptMessage, params);
+    if (finished != null) {
+      finished(map["code"]);
+    }
   }
 
   /// 获取所有的未读数
