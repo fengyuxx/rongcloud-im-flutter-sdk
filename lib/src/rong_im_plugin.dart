@@ -424,7 +424,7 @@ class RongcloudImPlugin {
   }
 
   static Future<RongcloudImPluginResult<void>> sendReadReceiptMessage(
-      RCConversationType conversationType,
+      int conversationType,
       String targetId,
       DateTime sentAt) async {
     Map params = {
