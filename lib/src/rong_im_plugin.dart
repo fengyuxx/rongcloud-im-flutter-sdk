@@ -373,6 +373,25 @@ class RongcloudImPlugin {
     }
   }
 
+  static Future<bool> setMessageSentStatus(int messageId, int sentStatus) async {
+    Map map = {
+      "messageId": messageId,
+      "sentStatus": sentStatus,
+    };
+
+    bool rc = await _channel.invokeMethod(RCMethodKey.SetMessageSentStatus, map);
+    return rc;
+  }
+
+  static Future<bool> setMessageReceivedStatus(int messageId, int receivedStatus) async {
+    Map map = {
+      "messageId": messageId,
+      "receivedStatus": receivedStatus,
+    };
+    bool rc = await _channel.invokeMethod(RCMethodKey.SetMessageReceivedStatus, map);
+    return rc;
+  }
+
   /// 获取所有的未读数
   ///
   /// [finished] 回调结果，code 为 0 代表正常

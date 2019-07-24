@@ -34,6 +34,8 @@ class RCMethodKey {
   static const String SetConversationToTop = 'setConversationToTop';
   static const String GetTopConversationList = 'getTopConversationList';
 
+  static const String SetMessageReceivedStatus = 'setMessageReceivedStatus';
+  static const String SetMessageSentStatus = 'setMessageSentStatus';
 }
 
 //callback list //native 会触发此方法

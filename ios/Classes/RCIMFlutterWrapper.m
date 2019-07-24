@@ -85,10 +85,14 @@
         [self setConversationToTop:call.arguments result:result];
     }else if ([RCMethodKeyGetUnreadCountConversationTypeList isEqualToString:call.method]) {
         [self getUnreadCountConversationTypeList:call.arguments result:result];
+    }else if([RCMethodKeySetMessageSentStatus isEqualToString:call.method]){
+        [self setMessageSentStatus:call.arguments result:result];
+    }else if([RCMethodKeySetMessageReceivedStatus isEqualToString:call.method]){
+        [self setMessageReceivedStatus:call.arguments result:result];
     }else {
         result(FlutterMethodNotImplemented);
     }
-
+    
 }
 
 
@@ -184,7 +188,7 @@
         NSString *portraitUrl = param[@"portraitUrl"];
         if(userId.length >=0) {
             RCUserInfo *user = [[RCUserInfo alloc] initWithUserId:userId name:name portrait:portraitUrl];
-//            [[RCIMClient sharedRCIMClient] refreshUserInfoCache:user withUserId:userId];
+            //            [[RCIMClient sharedRCIMClient] refreshUserInfoCache:user withUserId:userId];
         }
     }
 }
@@ -209,7 +213,7 @@
         if([objName isEqualToString:RCVoiceMessageTypeIdentifier]) {
             content = [self getVoiceMessage:data];
         }else {
-             content = [[RCMessageMapper sharedMapper] messageContentWithClass:clazz fromData:data];
+            content = [[RCMessageMapper sharedMapper] messageContentWithClass:clazz fromData:data];
         }
         if(content == nil) {
             [RCLog e:[NSString stringWithFormat:@"%@  message content is nil",LOG_TAG]];
@@ -518,6 +522,32 @@
     }
 }
 
+- (void)setMessageSentStatus:(id)arg result:(FlutterResult)result{
+    NSString *LOG_TAG =  @"setMessageSentStatus";
+    [RCLog i:[NSString stringWithFormat:@"%@ start param:%@",LOG_TAG,arg]];
+    if ([arg isKindOfClass:[NSDictionary class]]) {
+        
+        NSDictionary *param = (NSDictionary *)arg;
+        long messageId = [param[@"messageId"] longValue];
+        RCSentStatus sentStatus = (RCSentStatus)[param[@"sentStatus"] intValue];
+        bool rc = [[RCIMClient sharedRCIMClient] setMessageSentStatus:messageId sentStatus:sentStatus];
+        result([NSNumber numberWithBool:rc]);
+    }
+}
+
+- (void)setMessageReceivedStatus:(id)arg result:(FlutterResult)result{
+    NSString *LOG_TAG =  @"setMessageReceivedStatus";
+    [RCLog i:[NSString stringWithFormat:@"%@ start param:%@",LOG_TAG,arg]];
+    if ([arg isKindOfClass:[NSDictionary class]]) {
+        
+        NSDictionary *param = (NSDictionary *)arg;
+        long messageId = [param[@"messageId"] longValue];
+        RCReceivedStatus receivedStatus = (RCReceivedStatus)[param[@"receivedStatus"] intValue];
+        bool rc = [[RCIMClient sharedRCIMClient] setMessageReceivedStatus:messageId receivedStatus:receivedStatus];
+        result([NSNumber numberWithBool:rc]);
+    }
+}
+
 #pragma mark -- 未读数
 
 - (void)getTotalUnreadCount:(FlutterResult)result{
@@ -612,10 +642,10 @@
     if([arg isKindOfClass:[NSDictionary class]]) {
         NSDictionary *param = (NSDictionary *)arg;
         NSArray *typeArray = param[@"conversationTypeList"];
-  
-       NSArray *conversationArray = [[RCIMClient sharedRCIMClient] getBlockedConversationList:typeArray];
         
-       result(@{@"conversationList":conversationArray,@"code":@(0)});
+        NSArray *conversationArray = [[RCIMClient sharedRCIMClient] getBlockedConversationList:typeArray];
+        
+        result(@{@"conversationList":conversationArray,@"code":@(0)});
     }
 }
 
@@ -672,7 +702,7 @@
 
 #pragma mark - util
 - (void)updateIMConfig {
-//    [RCIM sharedRCIM].enablePersistentUserInfoCache = self.config.enablePersistentUserInfoCache;
+    //    [RCIM sharedRCIM].enablePersistentUserInfoCache = self.config.enablePersistentUserInfoCache;
 }
 
 - (RCMessageContent *)getVoiceMessage:(NSData *)data {
