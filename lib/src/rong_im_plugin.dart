@@ -634,6 +634,13 @@ class RongcloudImPlugin {
   ///[left] 剩余未接收的消息个数 left>=0
   static Function(Message msg, int left) onMessageReceived;
 
+  ///收到消息的回调
+  ///
+  ///[msg] 消息
+  ///
+  ///[readerUserIdList] 已读userId列表
+  static Function(Message msg, Map readerUserIdList) onMessageReceiptResponseReceived;
+
   ///加入聊天的回调
   ///
   ///[targetId] 聊天室 id
@@ -680,6 +687,16 @@ class RongcloudImPlugin {
           }
           break;
 
+        case RCMethodCallBackKey.ReceiveMessageReceiptResponseCallback:
+          if (onMessageReceiptResponseReceived != null) {
+            Map map = call.arguments;
+            String messageString = map["message"];
+            Message msg = MessageFactory.instance.string2Message(messageString);
+            Map readerUserIdList = map["readerList"];
+            onMessageReceiptResponseReceived(msg, readerUserIdList);
+          }
+          break;
+
         case RCMethodCallBackKey.JoinChatRoom:
           if (onJoinChatRoom != null) {
             Map map = call.arguments;
@@ -716,6 +733,7 @@ class RongcloudImPlugin {
           }
           break;
       }
+      return;
     });
   }
 }

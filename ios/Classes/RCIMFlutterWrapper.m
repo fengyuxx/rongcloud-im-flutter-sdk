@@ -152,7 +152,18 @@
             result(@(0));
         } error:^(RCConnectErrorCode status) {
             [RCLog i:[NSString stringWithFormat:@"%@ fail %@",LOG_TAG,@(status)]];
-            result(@(status));
+            if(status == RC_CONN_ID_REJECT ||
+               status == RC_CONN_NOT_AUTHRORIZED ||
+               status == RC_CONN_PACKAGE_NAME_INVALID ||
+               status == RC_CONN_APP_BLOCKED_OR_DELETED ||
+               status == RC_CONN_USER_BLOCKED ||
+               status == RC_CONN_OTHER_DEVICE_LOGIN ||
+               status == RC_DISCONN_KICK ||
+               status == RC_CLIENT_NOT_INIT ||
+               status == RC_INVALID_PARAMETER ||
+               status == RC_INVALID_ARGUMENT){
+                result(@(status));
+            }
         } tokenIncorrect:^{
             [RCLog i:[NSString stringWithFormat:@"%@ fail %@",LOG_TAG,@(RC_CONN_TOKEN_INCORRECT)]];
             result(@(RC_CONN_TOKEN_INCORRECT));
@@ -722,6 +733,21 @@
         
         [self.channel invokeMethod:RCMethodCallBackKeyReceiveMessage arguments:dic];
     }
+}
+
+
+- (void)onMessageReceiptResponse:(RCConversationType)conversationType
+                        targetId:(NSString *)targetId
+                      messageUId:(NSString *)messageUId
+                      readerList:(NSMutableDictionary *)userIdList{
+    RCMessage *message = [[RCIMClient sharedRCIMClient] getMessageByUId:messageUId];
+    
+    NSMutableDictionary *dic = [NSMutableDictionary new];
+    NSString *jsonString = [RCFlutterMessageFactory message2String:message];
+    [dic setObject:jsonString forKey:@"message"];
+    [dic setObject:userIdList forKey:@"readerList"];
+    
+    [self.channel invokeMethod:RCMethodCallBackKeyReceiveMessageReceiptResponse arguments:dic];
 }
 
 #pragma mark - RCConnectionStatusChangeDelegate

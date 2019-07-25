@@ -40,6 +40,7 @@ static NSString *RCMethodKeySendReadReceiptMessage = @"sendReadReceiptMessage";
 static NSString *RCMethodCallBackKeySendMessage = @"sendMessageCallBack";
 static NSString *RCMethodCallBackKeyRefreshUserInfo = @"refreshUserInfoCallBack";
 static NSString *RCMethodCallBackKeyReceiveMessage = @"receiveMessageCallBack";
+static NSString *RCMethodCallBackKeyReceiveMessageReceiptResponse = @"receiveMessageReceiptResponseCallback";
 static NSString *RCMethodCallBackKeyJoinChatRoom = @"joinChatRoomCallBack";
 static NSString *RCMethodCallBackKeyQuitChatRoom = @"quitChatRoomCallBack";
 static NSString *RCMethodCallBackKeyUploadMediaProgress = @"uploadMediaProgressCallBack";
