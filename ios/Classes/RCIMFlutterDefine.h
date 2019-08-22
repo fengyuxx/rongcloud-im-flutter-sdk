@@ -30,11 +30,17 @@ static NSString *RCMethodKeyGetBlockedConversationList = @"getBlockedConversatio
 static NSString *RCMethodKeySetConversationToTop = @"setConversationToTop";
 static NSString *RCMethodKeyGetTopConversationList = @"getTopConversationList";
 
+static NSString *RCMethodKeySetMessageReceivedStatus = @"setMessageReceivedStatus";
+static NSString *RCMethodKeySetMessageSentStatus = @"setMessageSentStatus";
+static NSString *RCMethodKeySendReadReceiptMessage = @"sendReadReceiptMessage";
+
+
 
 //callback iOS 通知 flutter
 static NSString *RCMethodCallBackKeySendMessage = @"sendMessageCallBack";
 static NSString *RCMethodCallBackKeyRefreshUserInfo = @"refreshUserInfoCallBack";
 static NSString *RCMethodCallBackKeyReceiveMessage = @"receiveMessageCallBack";
+static NSString *RCMethodCallBackKeyReceiveMessageReceiptResponse = @"receiveMessageReceiptResponseCallback";
 static NSString *RCMethodCallBackKeyJoinChatRoom = @"joinChatRoomCallBack";
 static NSString *RCMethodCallBackKeyQuitChatRoom = @"quitChatRoomCallBack";
 static NSString *RCMethodCallBackKeyUploadMediaProgress = @"uploadMediaProgressCallBack";

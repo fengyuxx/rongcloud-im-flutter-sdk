@@ -85,10 +85,16 @@
         [self setConversationToTop:call.arguments result:result];
     }else if ([RCMethodKeyGetUnreadCountConversationTypeList isEqualToString:call.method]) {
         [self getUnreadCountConversationTypeList:call.arguments result:result];
+    }else if([RCMethodKeySetMessageSentStatus isEqualToString:call.method]){
+        [self setMessageSentStatus:call.arguments result:result];
+    }else if([RCMethodKeySetMessageReceivedStatus isEqualToString:call.method]){
+        [self setMessageReceivedStatus:call.arguments result:result];
+    }else if([RCMethodKeySendReadReceiptMessage isEqualToString:call.method]){
+        [self sendReadReceiptMessage:call.arguments result:result];
     }else {
         result(FlutterMethodNotImplemented);
     }
-
+    
 }
 
 
@@ -146,7 +152,18 @@
             result(@(0));
         } error:^(RCConnectErrorCode status) {
             [RCLog i:[NSString stringWithFormat:@"%@ fail %@",LOG_TAG,@(status)]];
-            result(@(status));
+            if(status == RC_CONN_ID_REJECT ||
+               status == RC_CONN_NOT_AUTHRORIZED ||
+               status == RC_CONN_PACKAGE_NAME_INVALID ||
+               status == RC_CONN_APP_BLOCKED_OR_DELETED ||
+               status == RC_CONN_USER_BLOCKED ||
+               status == RC_CONN_OTHER_DEVICE_LOGIN ||
+               status == RC_DISCONN_KICK ||
+               status == RC_CLIENT_NOT_INIT ||
+               status == RC_INVALID_PARAMETER ||
+               status == RC_INVALID_ARGUMENT){
+                result(@(status));
+            }
         } tokenIncorrect:^{
             [RCLog i:[NSString stringWithFormat:@"%@ fail %@",LOG_TAG,@(RC_CONN_TOKEN_INCORRECT)]];
             result(@(RC_CONN_TOKEN_INCORRECT));
@@ -184,7 +201,7 @@
         NSString *portraitUrl = param[@"portraitUrl"];
         if(userId.length >=0) {
             RCUserInfo *user = [[RCUserInfo alloc] initWithUserId:userId name:name portrait:portraitUrl];
-//            [[RCIMClient sharedRCIMClient] refreshUserInfoCache:user withUserId:userId];
+            //            [[RCIMClient sharedRCIMClient] refreshUserInfoCache:user withUserId:userId];
         }
     }
 }
@@ -209,7 +226,7 @@
         if([objName isEqualToString:RCVoiceMessageTypeIdentifier]) {
             content = [self getVoiceMessage:data];
         }else {
-             content = [[RCMessageMapper sharedMapper] messageContentWithClass:clazz fromData:data];
+            content = [[RCMessageMapper sharedMapper] messageContentWithClass:clazz fromData:data];
         }
         if(content == nil) {
             [RCLog e:[NSString stringWithFormat:@"%@  message content is nil",LOG_TAG]];
@@ -518,6 +535,62 @@
     }
 }
 
+- (void)setMessageSentStatus:(id)arg result:(FlutterResult)result{
+    NSString *LOG_TAG =  @"setMessageSentStatus";
+    [RCLog i:[NSString stringWithFormat:@"%@ start param:%@",LOG_TAG,arg]];
+    if ([arg isKindOfClass:[NSDictionary class]]) {
+        
+        NSDictionary *param = (NSDictionary *)arg;
+        long messageId = [param[@"messageId"] longValue];
+        RCSentStatus sentStatus = (RCSentStatus)[param[@"sentStatus"] intValue];
+        bool rc = [[RCIMClient sharedRCIMClient] setMessageSentStatus:messageId sentStatus:sentStatus];
+        result([NSNumber numberWithBool:rc]);
+    }
+}
+
+- (void)setMessageReceivedStatus:(id)arg result:(FlutterResult)result{
+    NSString *LOG_TAG =  @"setMessageReceivedStatus";
+    [RCLog i:[NSString stringWithFormat:@"%@ start param:%@",LOG_TAG,arg]];
+    if ([arg isKindOfClass:[NSDictionary class]]) {
+        
+        NSDictionary *param = (NSDictionary *)arg;
+        long messageId = [param[@"messageId"] longValue];
+        RCReceivedStatus receivedStatus = (RCReceivedStatus)[param[@"receivedStatus"] intValue];
+        bool rc = [[RCIMClient sharedRCIMClient] setMessageReceivedStatus:messageId receivedStatus:receivedStatus];
+        result([NSNumber numberWithBool:rc]);
+    }
+}
+
+//- (void)sendReadReceiptMessage:(RCConversationType)conversationType
+//                      targetId:(NSString *)targetId
+//                          time:(long long)timestamp
+//                       success:(void (^)(void))successBlock
+//                         error:(void (^)(RCErrorCode nErrorCode))errorBlock;
+
+- (void)sendReadReceiptMessage:(id)arg result:(FlutterResult)result{
+    NSString *LOG_TAG =  @"sendReadReceiptMessage";
+    [RCLog i:[NSString stringWithFormat:@"%@ start param:%@",LOG_TAG,arg]];
+    if ([arg isKindOfClass:[NSDictionary class]]) {
+    
+        NSDictionary *param = (NSDictionary *)arg;
+        RCConversationType conversationType = (RCConversationType)[param[@"conversationType"] intValue];
+        NSString *targetId = param[@"targetId"];
+        long long timestamp = [param[@"timestamp"] longLongValue];
+        
+        [[RCIMClient sharedRCIMClient] sendReadReceiptMessage:conversationType targetId:targetId time:timestamp success:^{
+            NSMutableDictionary *callbackDic = [NSMutableDictionary new];
+            [callbackDic setObject:@(0) forKey:@"code"];
+            result(callbackDic);
+        } error:^(RCErrorCode nErrorCode) {
+            [RCLog e:[NSString stringWithFormat:@"%@ %@",LOG_TAG,@(nErrorCode)]];
+            NSMutableDictionary *callbackDic = [NSMutableDictionary new];
+            [callbackDic setObject:@(nErrorCode) forKey:@"code"];
+            result(callbackDic);
+        }];
+    }
+}
+
+
 #pragma mark -- 未读数
 
 - (void)getTotalUnreadCount:(FlutterResult)result{
@@ -612,10 +685,10 @@
     if([arg isKindOfClass:[NSDictionary class]]) {
         NSDictionary *param = (NSDictionary *)arg;
         NSArray *typeArray = param[@"conversationTypeList"];
-  
-       NSArray *conversationArray = [[RCIMClient sharedRCIMClient] getBlockedConversationList:typeArray];
         
-       result(@{@"conversationList":conversationArray,@"code":@(0)});
+        NSArray *conversationArray = [[RCIMClient sharedRCIMClient] getBlockedConversationList:typeArray];
+        
+        result(@{@"conversationList":conversationArray,@"code":@(0)});
     }
 }
 
@@ -662,6 +735,21 @@
     }
 }
 
+
+- (void)onMessageReceiptResponse:(RCConversationType)conversationType
+                        targetId:(NSString *)targetId
+                      messageUId:(NSString *)messageUId
+                      readerList:(NSMutableDictionary *)userIdList{
+    RCMessage *message = [[RCIMClient sharedRCIMClient] getMessageByUId:messageUId];
+    
+    NSMutableDictionary *dic = [NSMutableDictionary new];
+    NSString *jsonString = [RCFlutterMessageFactory message2String:message];
+    [dic setObject:jsonString forKey:@"message"];
+    [dic setObject:userIdList forKey:@"readerList"];
+    
+    [self.channel invokeMethod:RCMethodCallBackKeyReceiveMessageReceiptResponse arguments:dic];
+}
+
 #pragma mark - RCConnectionStatusChangeDelegate
 - (void)onConnectionStatusChanged:(RCConnectionStatus)status {
     NSString *LOG_TAG =  @"onConnectionStatusChanged";
@@ -672,7 +760,7 @@
 
 #pragma mark - util
 - (void)updateIMConfig {
-//    [RCIM sharedRCIM].enablePersistentUserInfoCache = self.config.enablePersistentUserInfoCache;
+    //    [RCIM sharedRCIM].enablePersistentUserInfoCache = self.config.enablePersistentUserInfoCache;
 }
 
 - (RCMessageContent *)getVoiceMessage:(NSData *)data {

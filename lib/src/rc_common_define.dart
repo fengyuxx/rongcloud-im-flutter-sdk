@@ -34,6 +34,9 @@ class RCMethodKey {
   static const String SetConversationToTop = 'setConversationToTop';
   static const String GetTopConversationList = 'getTopConversationList';
 
+  static const String SetMessageReceivedStatus = 'setMessageReceivedStatus';
+  static const String SetMessageSentStatus = 'setMessageSentStatus';
+  static const String SendReadReceiptMessage = 'sendReadReceiptMessage';
 }
 
 //callback list //native 会触发此方法
@@ -41,6 +44,7 @@ class RCMethodCallBackKey {
   static const String SendMessage = 'sendMessageCallBack';
   static const String RefreshUserInfo = 'refreshUserInfoCallBack';
   static const String ReceiveMessage = 'receiveMessageCallBack';
+  static const String ReceiveMessageReceiptResponseCallback = 'receiveMessageReceiptResponseCallback';
   static const String JoinChatRoom = 'joinChatRoomCallBack';
   static const String QuitChatRoom = 'quitChatRoomCallBack';
   static const String UploadMediaProgress = 'uploadMediaProgressCallBack';
