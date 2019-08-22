@@ -10,6 +10,7 @@
 #import "RCFlutterConfig.h"
 #import "RCFlutterMessageFactory.h"
 #import "RCIMFlutterLog.h"
+#import <AVKit/AVKit.h>
 
 @interface RCMessageMapper : NSObject
 + (instancetype)sharedMapper;
@@ -771,9 +772,109 @@
         NSLog(@"创建语音消息失败：语音文件路径不存在:%@",localPath);
         return nil;
     }
-    NSData *voiceData= [NSData dataWithContentsOfFile:localPath];
+    NSString *destPath;
+    if ([localPath containsString:@".m4a"]) {
+        destPath = [localPath stringByReplacingOccurrencesOfString:@".m4a" withString:@".wav"];
+        [self convetM4aToWav:[NSURL fileURLWithPath:localPath] destUrl:[NSURL fileURLWithPath:destPath]];
+    }else{
+        destPath = localPath;
+    }
+    NSData *voiceData= [NSData dataWithContentsOfFile:destPath];
     RCVoiceMessage *msg = [RCVoiceMessage messageWithAudio:voiceData duration:duration];
     return msg;
+}
+
+- (void)convetM4aToWav:(NSURL *)originalUrl  destUrl:(NSURL *)destUrl {
+    
+    AVURLAsset *songAsset = [AVURLAsset URLAssetWithURL:originalUrl options:nil];
+    
+    //读取原始文件信息
+    NSError *error = nil;
+    AVAssetReader *assetReader = [AVAssetReader assetReaderWithAsset:songAsset error:&error];
+    if (error) {
+        NSLog (@"error: %@", error);
+        return;
+    }
+    
+    AVAssetReaderOutput *assetReaderOutput = [AVAssetReaderAudioMixOutput
+                                              assetReaderAudioMixOutputWithAudioTracks:songAsset.tracks
+                                              audioSettings: nil];
+    if (![assetReader canAddOutput:assetReaderOutput]) {
+        NSLog (@"can't add reader output... die!");
+        return;
+    }
+    [assetReader addOutput:assetReaderOutput];
+    
+    
+    AVAssetWriter *assetWriter = [AVAssetWriter assetWriterWithURL:destUrl
+                                                          fileType:AVFileTypeCoreAudioFormat
+                                                             error:&error];
+    if (error) {
+        NSLog (@"error: %@", error);
+        return;
+    }
+    AudioChannelLayout channelLayout;
+    memset(&channelLayout, 0, sizeof(AudioChannelLayout));
+    channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_Stereo;
+    NSDictionary *outputSettings = [NSDictionary dictionaryWithObjectsAndKeys:
+                                    [NSNumber numberWithInt:kAudioFormatLinearPCM], AVFormatIDKey,
+                                    [NSNumber numberWithFloat:16000.0], AVSampleRateKey,
+                                    [NSNumber numberWithInt:2], AVNumberOfChannelsKey,
+                                    [NSData dataWithBytes:&channelLayout length:sizeof(AudioChannelLayout)], AVChannelLayoutKey,
+                                    [NSNumber numberWithInt:16], AVLinearPCMBitDepthKey,
+                                    [NSNumber numberWithBool:NO], AVLinearPCMIsNonInterleaved,
+                                    [NSNumber numberWithBool:NO],AVLinearPCMIsFloatKey,
+                                    [NSNumber numberWithBool:NO], AVLinearPCMIsBigEndianKey,
+                                    nil];
+    AVAssetWriterInput *assetWriterInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio
+                                                                              outputSettings:outputSettings];
+    if ([assetWriter canAddInput:assetWriterInput]) {
+        [assetWriter addInput:assetWriterInput];
+    } else {
+        NSLog (@"can't add asset writer input... die!");
+        return;
+    }
+    
+    assetWriterInput.expectsMediaDataInRealTime = NO;
+    
+    [assetWriter startWriting];
+    [assetReader startReading];
+    
+    AVAssetTrack *soundTrack = [songAsset.tracks objectAtIndex:0];
+    CMTime startTime = CMTimeMake (0, soundTrack.naturalTimeScale);
+    [assetWriter startSessionAtSourceTime:startTime];
+    
+    __block UInt64 convertedByteCount = 0;
+    
+    dispatch_queue_t mediaInputQueue = dispatch_queue_create("mediaInputQueue", NULL);
+    [assetWriterInput requestMediaDataWhenReadyOnQueue:mediaInputQueue
+                                            usingBlock: ^
+     {
+         while (assetWriterInput.readyForMoreMediaData) {
+             CMSampleBufferRef nextBuffer = [assetReaderOutput copyNextSampleBuffer];
+             if (nextBuffer) {
+                 // append buffer
+                 [assetWriterInput appendSampleBuffer: nextBuffer];
+                 NSLog (@"appended a buffer (%zu bytes)",
+                        CMSampleBufferGetTotalSampleSize (nextBuffer));
+                 convertedByteCount += CMSampleBufferGetTotalSampleSize (nextBuffer);
+                 
+                 
+             } else {
+                 [assetWriterInput markAsFinished];
+                 [assetWriter finishWritingWithCompletionHandler:^{
+                     
+                 }];
+                 [assetReader cancelReading];
+                 NSDictionary *outputFileAttributes = [[NSFileManager defaultManager]
+                                                       attributesOfItemAtPath:[destUrl path]
+                                                       error:nil];
+                 NSLog (@"FlyElephant %lld",[outputFileAttributes fileSize]);
+                 break;
+             }
+         }
+         
+     }];
 }
 
 #pragma mark - private method
