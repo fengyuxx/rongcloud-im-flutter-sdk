@@ -434,7 +434,7 @@ class RongcloudImPlugin {
     };
     Map result =
         await _channel.invokeMethod(RCMethodKey.SendReadReceiptMessage, params);
-    return RongcloudImPluginResult(code: int.parse(result['code']));
+    return RongcloudImPluginResult(code: result['code']);
   }
 
   /// 获取所有的未读数
@@ -447,7 +447,7 @@ class RongcloudImPlugin {
       finished(result["count"], result["code"]);
     }
     return RongcloudImPluginResult<int>(
-        result: int.parse(result["count"]), code: int.parse(result["code"]));
+        result: result["count"], code: result["code"]);
   }
 
   /// 获取单个会话的未读数
@@ -468,7 +468,7 @@ class RongcloudImPlugin {
       finished(result["count"], result["code"]);
     }
     return RongcloudImPluginResult<int>(
-        result: int.parse(result["count"]), code: int.parse(result["code"]));
+        result: result["count"], code: result["code"]);
   }
 
   /// 批量获取特定某些会话的未读数
@@ -491,7 +491,7 @@ class RongcloudImPlugin {
       finished(result["count"], result["code"]);
     }
     return RongcloudImPluginResult<int>(
-        result: int.parse(result["count"]), code: int.parse(result["code"]));
+        result: result["count"], code: result["code"]);
   }
 
   /// 设置会话的提醒状态
@@ -517,7 +517,7 @@ class RongcloudImPlugin {
       finished(result["status"], result["code"]);
     }
     return RongcloudImPluginResult<int>(
-        result: int.parse(result["status"]), code: int.parse(result["code"]));
+        result: result["status"], code: result["code"]);
   }
 
   /// 获取会话的提醒状态
@@ -538,7 +538,7 @@ class RongcloudImPlugin {
       finished(result["status"], result["code"]);
     }
     return RongcloudImPluginResult<int>(
-        result: int.parse(result["status"]), code: int.parse(result["code"]));
+        result: result["status"], code: result["code"]);
   }
 
   /// 获取设置免打扰的会话列表
