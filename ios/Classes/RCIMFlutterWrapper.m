@@ -12,6 +12,20 @@
 #import "RCIMFlutterLog.h"
 #import <AVKit/AVKit.h>
 
+#import "WPRCGiftMessage.h"
+#import "WPRCFeedbackMessage.h"
+#import "WPRCGiftOpenNotification.h"
+#import "WPRCMatchNotification.h"
+
+#import "WPCommandMessage.h"
+#import "WPRCGiftOpenCommand.h"
+#import "WPRCVIPConversationStartCommand.h"
+#import "WPRCKickoutCommand.h"
+#import "WPRCUserDeletedCommand.h"
+#import "WPRCUnmatchCommand.h"
+#import "WPRCRematchCommand.h"
+#import "WPRCExtendCommand.h"
+
 @interface RCMessageMapper : NSObject
 + (instancetype)sharedMapper;
 - (Class)messageClassWithTypeIdenfifier:(NSString *)identifier;
@@ -32,6 +46,26 @@
     });
     return wrapper;
 }
+
+- (instancetype)init{
+    self = [super init];
+    [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCGiftMessage class]];
+    [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCFeedbackMessage class]];
+    
+    [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCGiftOpenNotification class]];
+    [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCMatchNotification class]];
+    
+    [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCGiftOpenCommand class]];
+    [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCVIPConversationStartCommand class]];
+    [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCKickoutCommand class]];
+    [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCUserDeletedCommand class]];
+    [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCUnmatchCommand class]];
+    
+    [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCRematchCommand class]];
+    [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCExtendCommand class]];
+    return self;
+}
+
 - (void)addFlutterChannel:(FlutterMethodChannel *)channel {
     self.channel = channel;
 }
