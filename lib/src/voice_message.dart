@@ -23,7 +23,7 @@ class VoiceMessage extends MessageContent {
     this.duration = map["duration"];
     this.extra = map["extra"];
     this.localPath = map["localPath"];
-    this.remoteUri = map["remoteUrl"];
+    this.remoteUri = Uri.parse(map["remoteUrl"]);
   }
 
   @override
