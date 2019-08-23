@@ -813,8 +813,7 @@
     }else{
         destPath = localPath;
     }
-    NSData *voiceData= [NSData dataWithContentsOfFile:destPath];
-    RCVoiceMessage *msg = [RCVoiceMessage messageWithAudio:voiceData duration:duration];
+    RCHQVoiceMessage *msg = [RCHQVoiceMessage messageWithPath:destPath duration:duration];
     return msg;
 }
 
