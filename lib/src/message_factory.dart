@@ -9,6 +9,7 @@ import 'message_content.dart';
 import 'text_message.dart';
 import 'image_message.dart';
 import 'voice_message.dart';
+import 'hq_voice_message.dart';
 
 class MessageFactory extends Object {
   factory MessageFactory() =>_getInstance();
@@ -115,8 +116,11 @@ class MessageFactory extends Object {
     }else if(objectName == ImageMessage.objectName) {
       content = new ImageMessage();
       content.decode(contentS);
+    }else if(objectName == HQVoiceMessage.objectName) {
+      content = new HQVoiceMessage();
+      content.decode(contentS);
     }else if(objectName == VoiceMessage.objectName) {
-      content = new VoiceMessage();
+      content = new HQVoiceMessage();
       content.decode(contentS);
     }
     return content;

@@ -3,7 +3,7 @@ import 'message_content.dart';
 
 class VoiceMessage extends MessageContent {
 
-  static const String objectName = "RC:HQVCMsg";
+  static const String objectName = "RC:VcMsg";
 
   int duration;
   String extra;
