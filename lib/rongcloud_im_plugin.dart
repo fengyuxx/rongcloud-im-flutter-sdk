@@ -11,3 +11,4 @@ export 'src/rc_status_define.dart';
 export 'src/rong_im_plugin.dart';
 export 'src/text_message.dart';
 export 'src/voice_message.dart';
+export 'src/hq_voice_message.dart';
