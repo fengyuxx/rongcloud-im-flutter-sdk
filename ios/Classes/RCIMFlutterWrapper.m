@@ -258,7 +258,7 @@
         Class clazz = [[RCMessageMapper sharedMapper] messageClassWithTypeIdenfifier:objName];
         
         RCMessageContent *content = nil;
-        if([objName isEqualToString:RCVoiceMessageTypeIdentifier]) {
+        if([objName isEqualToString:RCHQVoiceMessageTypeIdentifier]) {
             content = [self getVoiceMessage:data];
         }else {
             content = [[RCMessageMapper sharedMapper] messageContentWithClass:clazz fromData:data];
