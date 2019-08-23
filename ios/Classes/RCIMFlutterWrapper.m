@@ -260,7 +260,9 @@
         RCMessageContent *content = nil;
         if([objName isEqualToString:RCVoiceMessageTypeIdentifier]) {
             content = [self getVoiceMessage:data];
-        }else {
+        } else if([objName isEqualToString:RCHQVoiceMessageTypeIdentifier]){
+            content = [self getHQVoiceMessage:data];
+        } else {
             content = [[RCMessageMapper sharedMapper] messageContentWithClass:clazz fromData:data];
         }
         if(content == nil) {
@@ -268,23 +270,45 @@
             result(nil);
             return;
         }
-        
+        RCMessage *message;
         __weak typeof(self) ws = self;
-        RCMessage *message = [[RCIMClient sharedRCIMClient] sendMessage:type targetId:targetId content:content pushContent:nil pushData:nil success:^(long messageId) {
-            [RCLog i:[NSString stringWithFormat:@"%@ success",LOG_TAG]];
-            NSMutableDictionary *dic = [NSMutableDictionary new];
-            [dic setObject:@(messageId) forKey:@"messageId"];
-            [dic setObject:@(SentStatus_SENT) forKey:@"status"];
-            [dic setObject:@(0) forKey:@"code"];
-            [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
-        } error:^(RCErrorCode nErrorCode, long messageId) {
-            [RCLog e:[NSString stringWithFormat:@"%@ %@",LOG_TAG,@(nErrorCode)]];
-            NSMutableDictionary *dic = [NSMutableDictionary new];
-            [dic setObject:@(messageId) forKey:@"messageId"];
-            [dic setObject:@(SentStatus_FAILED) forKey:@"status"];
-            [dic setObject:@(nErrorCode) forKey:@"code"];
-            [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
-        }];
+        if([content isKindOfClass:[RCMediaMessageContent class]]){
+            message = [[RCIMClient sharedRCIMClient] sendMediaMessage:type targetId:targetId content:content pushContent:nil pushData:nil progress:^(int progress, long messageId) {
+                
+            } success:^(long messageId) {
+                [RCLog i:[NSString stringWithFormat:@"%@ success",LOG_TAG]];
+                NSMutableDictionary *dic = [NSMutableDictionary new];
+                [dic setObject:@(messageId) forKey:@"messageId"];
+                [dic setObject:@(SentStatus_SENT) forKey:@"status"];
+                [dic setObject:@(0) forKey:@"code"];
+                [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
+            } error:^(RCErrorCode nErrorCode, long messageId) {
+                [RCLog e:[NSString stringWithFormat:@"%@ %@",LOG_TAG,@(nErrorCode)]];
+                NSMutableDictionary *dic = [NSMutableDictionary new];
+                [dic setObject:@(messageId) forKey:@"messageId"];
+                [dic setObject:@(SentStatus_FAILED) forKey:@"status"];
+                [dic setObject:@(nErrorCode) forKey:@"code"];
+                [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
+            } cancel:^(long messageId) {
+                
+            }];
+        }else{
+            message = [[RCIMClient sharedRCIMClient] sendMessage:type targetId:targetId content:content pushContent:nil pushData:nil success:^(long messageId) {
+                [RCLog i:[NSString stringWithFormat:@"%@ success",LOG_TAG]];
+                NSMutableDictionary *dic = [NSMutableDictionary new];
+                [dic setObject:@(messageId) forKey:@"messageId"];
+                [dic setObject:@(SentStatus_SENT) forKey:@"status"];
+                [dic setObject:@(0) forKey:@"code"];
+                [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
+            } error:^(RCErrorCode nErrorCode, long messageId) {
+                [RCLog e:[NSString stringWithFormat:@"%@ %@",LOG_TAG,@(nErrorCode)]];
+                NSMutableDictionary *dic = [NSMutableDictionary new];
+                [dic setObject:@(messageId) forKey:@"messageId"];
+                [dic setObject:@(SentStatus_FAILED) forKey:@"status"];
+                [dic setObject:@(nErrorCode) forKey:@"code"];
+                [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
+            }];
+        }
         NSString *jsonString = [RCFlutterMessageFactory message2String:message];
         NSMutableDictionary *dic = [NSMutableDictionary new];
         [dic setObject:jsonString forKey:@"message"];
@@ -606,7 +630,7 @@
     NSString *LOG_TAG =  @"sendReadReceiptMessage";
     [RCLog i:[NSString stringWithFormat:@"%@ start param:%@",LOG_TAG,arg]];
     if ([arg isKindOfClass:[NSDictionary class]]) {
-    
+        
         NSDictionary *param = (NSDictionary *)arg;
         RCConversationType conversationType = (RCConversationType)[param[@"conversationType"] intValue];
         NSString *targetId = param[@"targetId"];
@@ -806,6 +830,26 @@
         NSLog(@"创建语音消息失败：语音文件路径不存在:%@",localPath);
         return nil;
     }
+    NSString *destPath = [self convertVoiceFile:localPath];
+    NSData *audio = [[NSData alloc] initWithContentsOfFile:destPath];
+    RCVoiceMessage *msg = [RCVoiceMessage messageWithAudio:audio duration:duration];
+    return msg;
+}
+
+- (RCMessageContent *)getHQVoiceMessage:(NSData *)data {
+    NSDictionary *contentDic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+    NSString *localPath = contentDic[@"localPath"];
+    int duration = [contentDic[@"duration"] intValue];
+    if(![[NSFileManager defaultManager] fileExistsAtPath:localPath]) {
+        NSLog(@"创建语音消息失败：语音文件路径不存在:%@",localPath);
+        return nil;
+    }
+    NSString *destPath = [self convertVoiceFile:localPath];
+    RCHQVoiceMessage *msg = [RCHQVoiceMessage messageWithPath:destPath duration:duration];
+    return msg;
+}
+
+- (NSString *)convertVoiceFile:(NSString *)localPath{
     NSString *destPath;
     if ([localPath containsString:@".m4a"]) {
         destPath = [localPath stringByReplacingOccurrencesOfString:@".m4a" withString:@".wav"];
@@ -813,9 +857,9 @@
     }else{
         destPath = localPath;
     }
-    RCHQVoiceMessage *msg = [RCHQVoiceMessage messageWithPath:destPath duration:duration];
-    return msg;
+    return destPath;
 }
+
 
 - (void)convetM4aToWav:(NSURL *)originalUrl  destUrl:(NSURL *)destUrl {
     
