@@ -922,7 +922,8 @@
     [assetWriter startSessionAtSourceTime:startTime];
     
     __block UInt64 convertedByteCount = 0;
-    
+    __block bool complete = NO;
+
     dispatch_queue_t mediaInputQueue = dispatch_queue_create("mediaInputQueue", NULL);
     [assetWriterInput requestMediaDataWhenReadyOnQueue:mediaInputQueue
                                             usingBlock: ^
@@ -935,23 +936,29 @@
                  NSLog (@"appended a buffer (%zu bytes)",
                         CMSampleBufferGetTotalSampleSize (nextBuffer));
                  convertedByteCount += CMSampleBufferGetTotalSampleSize (nextBuffer);
-                 
-                 
+
+
              } else {
                  [assetWriterInput markAsFinished];
                  [assetWriter finishWritingWithCompletionHandler:^{
-                     
+
                  }];
                  [assetReader cancelReading];
                  NSDictionary *outputFileAttributes = [[NSFileManager defaultManager]
                                                        attributesOfItemAtPath:[destUrl path]
                                                        error:nil];
                  NSLog (@"FlyElephant %lld",[outputFileAttributes fileSize]);
+                 complete = YES;
                  break;
              }
          }
-         
+
      }];
+
+    while (complete == NO) {
+        [[NSRunLoop currentRunLoop] runMode:NSRunLoopCommonModes beforeDate:[NSDate distantFuture]];
+    }
+    NSLog(@"complete");
 }
 
 #pragma mark - private method
