@@ -247,10 +247,6 @@
     if([arg isKindOfClass:[NSDictionary class]]) {
         NSDictionary *param = (NSDictionary *)arg;
         NSString *objName = param[@"objectName"];
-        if([self isMediaMessage:objName]) {
-            [self sendMediaMessage:arg result:result];
-            return;
-        }
         RCConversationType type = [param[@"conversationType"] integerValue];
         NSString *targetId = param[@"targetId"];
         NSString *contentStr = param[@"content"];
