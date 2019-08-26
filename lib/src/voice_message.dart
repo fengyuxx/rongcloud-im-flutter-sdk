@@ -2,7 +2,6 @@ import 'dart:convert' show json;
 import 'message_content.dart';
 
 class VoiceMessage extends MessageContent {
-
   static const String objectName = "RC:VcMsg";
 
   int duration;
@@ -11,10 +10,9 @@ class VoiceMessage extends MessageContent {
   String localPath;
   Uri remoteUri;
 
-
   @override
   void decode(String jsonStr) {
-    if(jsonStr == null) {
+    if (jsonStr == null) {
       print("[RC-Flutter-IM] Flutter VoiceMessage deocde error: no content");
       return;
     }
@@ -23,12 +21,18 @@ class VoiceMessage extends MessageContent {
     this.duration = map["duration"];
     this.extra = map["extra"];
     this.localPath = map["localPath"];
-    this.remoteUri = Uri.parse(map["remoteUrl"]);
+    if (map["remoteUrl"] != null) this.remoteUri = Uri.parse(map["remoteUrl"]);
   }
 
   @override
   String encode() {
-    Map map = {"content":this.content,"duration":this.duration,"extra":this.extra,"localPath":this.localPath,"remoteUrl":this.remoteUri};
+    Map map = {
+      "content": this.content,
+      "duration": this.duration,
+      "extra": this.extra,
+      "localPath": this.localPath,
+      "remoteUrl": this.remoteUri
+    };
     return json.encode(map);
   }
 
