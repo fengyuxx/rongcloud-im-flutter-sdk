@@ -263,10 +263,7 @@ class RongcloudImPlugin {
   /// 例如，本地会话中有10条消息，您想拉取更多保存在服务器的消息的话，recordTime应传入最早的消息的发送时间戳，count传入1~20之间的数值。
   static Future<RongcloudImPluginResult<List<Message>>>
       getRemoteHistoryMessages(
-          int conversationType,
-          String targetId,
-          int recordTime,
-          int count,
+          int conversationType, String targetId, int recordTime, int count,
           [Function(List<Message> msgList, int code) finished]) async {
     Map map = {
       'conversationType': conversationType,
@@ -424,9 +421,7 @@ class RongcloudImPlugin {
   }
 
   static Future<RongcloudImPluginResult<void>> sendReadReceiptMessage(
-      int conversationType,
-      String targetId,
-      DateTime sentAt) async {
+      int conversationType, String targetId, DateTime sentAt) async {
     Map params = {
       "conversationType": conversationType,
       "targetId": targetId,
@@ -458,8 +453,7 @@ class RongcloudImPlugin {
   ///
   /// [finished] 回调结果，code 为 0 代表正常
   static Future<RongcloudImPluginResult<int>> getUnreadCount(
-      int conversationType,
-      String targetId,
+      int conversationType, String targetId,
       [Function(int count, int code) finished]) async {
     Map params = {"conversationType": conversationType, "targetId": targetId};
     Map result =
@@ -479,8 +473,9 @@ class RongcloudImPlugin {
   ///
   /// [finished] 回调结果，code 为 0 代表正常
   static Future<RongcloudImPluginResult<int>>
-      getUnreadCountConversationTypeList(List<int> conversationTypeList,
-          bool isContain, [Function(int count, int code) finished]) async {
+      getUnreadCountConversationTypeList(
+          List<int> conversationTypeList, bool isContain,
+          [Function(int count, int code) finished]) async {
     Map params = {
       "conversationTypeList": conversationTypeList,
       "isContain": isContain
@@ -502,9 +497,7 @@ class RongcloudImPlugin {
   ///
   /// [finished] 回调结果，code 为 0 代表正常
   static Future<RongcloudImPluginResult<int>> setConversationNotificationStatus(
-      int conversationType,
-      String targetId,
-      bool isBlocked,
+      int conversationType, String targetId, bool isBlocked,
       [Function(int status, int code) finished]) async {
     Map params = {
       "conversationType": conversationType,
@@ -528,8 +521,7 @@ class RongcloudImPlugin {
   ///
   /// [finished] 回调结果，code 为 0 代表正常
   static Future<RongcloudImPluginResult<int>> getConversationNotificationStatus(
-      int conversation,
-      String targetId,
+      int conversation, String targetId,
       [Function(int status, int code) finished]) async {
     Map params = {"conversation": conversation, "targetId": targetId};
     Map result = await _channel.invokeMethod(
@@ -546,8 +538,10 @@ class RongcloudImPlugin {
   /// [conversationTypeList] 会话类型数组，参见枚举 [RCConversationType]
   ///
   /// [finished] 回调结果，code 为 0 代表正常
-  static Future<RongcloudImPluginResult<List<Conversation>>> getBlockedConversationList(List<int> conversationTypeList,
-      [Function(List<Conversation> convertionList, int code) finished]) async {
+  static Future<RongcloudImPluginResult<List<Conversation>>>
+      getBlockedConversationList(List<int> conversationTypeList,
+          [Function(List<Conversation> convertionList, int code)
+              finished]) async {
     Map params = {"conversationTypeList": conversationTypeList};
     Map result = await _channel.invokeMethod(
         RCMethodKey.GetBlockedConversationList, params);
@@ -579,8 +573,9 @@ class RongcloudImPlugin {
   /// [isTop] 是否设置置顶
   ///
   /// [finished] 回调结果，code 为 0 代表正常
-  static Future<RongcloudImPluginResult<bool>> setConversationToTop(int conversationType, String targetId,
-      bool isTop, [Function(bool status, int code) finished]) async {
+  static Future<RongcloudImPluginResult<bool>> setConversationToTop(
+      int conversationType, String targetId, bool isTop,
+      [Function(bool status, int code) finished]) async {
     Map params = {
       "conversationType": conversationType,
       "targetId": targetId,
@@ -591,7 +586,8 @@ class RongcloudImPlugin {
     if (finished != null) {
       finished(result["status"], result["code"]);
     }
-    return RongcloudImPluginResult<bool>(result: result["status"], code: result["code"]);
+    return RongcloudImPluginResult<bool>(
+        result: result["status"], code: result["code"]);
   }
 
 //
@@ -639,7 +635,18 @@ class RongcloudImPlugin {
   ///[msg] 消息
   ///
   ///[readerUserIdList] 已读userId列表
-  static Function(Message msg, Map readerUserIdList) onMessageReceiptResponseReceived;
+  static Function(Message msg, Map readerUserIdList)
+      onMessageReceiptResponseReceived;
+
+  ///收到消息的已读回调
+  ///
+  ///[conversationType] 会话类型 RCConversationType
+  ///
+  ///[targetId] 用户id
+  ///
+  ///[sentAt] 最后一条已读消息的sentAt时间戳
+  static Function(int conversationType, String targetId, DateTime sentAt)
+      onMessageReadReceiptReceived;
 
   ///加入聊天的回调
   ///
@@ -730,6 +737,19 @@ class RongcloudImPlugin {
             int code = map["status"];
             int status = ConnectionStatusConvert.convert(code);
             onConnectionStatusChange(status);
+          }
+          break;
+        case RCMethodCallBackKey.ReceiveMessageReadReceiptCallbackCallback:
+          if (onMessageReadReceiptReceived != null) {
+            Map map = call.arguments;
+            int conversationType = map['cType'];
+            String targetId = map['tId'];
+            int messageTime = map['messageTime'];
+            onMessageReadReceiptReceived(
+              conversationType,
+              targetId,
+              DateTime.fromMillisecondsSinceEpoch(messageTime, isUtc: true),
+            );
           }
           break;
       }

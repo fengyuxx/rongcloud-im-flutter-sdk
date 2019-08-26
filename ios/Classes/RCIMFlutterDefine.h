@@ -40,12 +40,15 @@ static NSString *RCMethodKeySendReadReceiptMessage = @"sendReadReceiptMessage";
 static NSString *RCMethodCallBackKeySendMessage = @"sendMessageCallBack";
 static NSString *RCMethodCallBackKeyRefreshUserInfo = @"refreshUserInfoCallBack";
 static NSString *RCMethodCallBackKeyReceiveMessage = @"receiveMessageCallBack";
-static NSString *RCMethodCallBackKeyReceiveMessageReceiptResponse = @"receiveMessageReceiptResponseCallback";
 static NSString *RCMethodCallBackKeyJoinChatRoom = @"joinChatRoomCallBack";
 static NSString *RCMethodCallBackKeyQuitChatRoom = @"quitChatRoomCallBack";
 static NSString *RCMethodCallBackKeyUploadMediaProgress = @"uploadMediaProgressCallBack";
 static NSString *RCMethodCallBackKeyGetRemoteHistoryMessages = @"getRemoteHistoryMessagesCallBack";
 static NSString *RCMethodCallBackKeyConnectionStatusChange = @"ConnectionStatusChangeCallBack";
+
+
+static NSString *RCMethodCallBackKeyReceiveMessageReceiptResponse = @"receiveMessageReceiptResponseCallback";
+static NSString *RCMethodCallBackKeyReceiveMessageReadReceipt = @"receiveMessageReadReceiptCallback";
 
 
 

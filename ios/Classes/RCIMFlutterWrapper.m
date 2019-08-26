@@ -63,8 +63,18 @@
     
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCRematchCommand class]];
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCExtendCommand class]];
+
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleRCLibDispatchReadReceiptNotification:) name:RCLibDispatchReadReceiptNotification object:nil];
+
     return self;
 }
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 
 - (void)addFlutterChannel:(FlutterMethodChannel *)channel {
     self.channel = channel;
@@ -790,7 +800,6 @@
     }
 }
 
-
 - (void)onMessageReceiptResponse:(RCConversationType)conversationType
                         targetId:(NSString *)targetId
                       messageUId:(NSString *)messageUId
@@ -803,6 +812,17 @@
     [dic setObject:userIdList forKey:@"readerList"];
     
     [self.channel invokeMethod:RCMethodCallBackKeyReceiveMessageReceiptResponse arguments:dic];
+}
+
+- (void)handleRCLibDispatchReadReceiptNotification:(NSNotification *)notification{
+    NSLog(@"handleRCLibDispatchReadReceiptNotification:");
+//    NSNumber *ctype = [notification.userInfo objectForKey:@"cType"];
+//    NSNumber *time = [notification.userInfo objectForKey:@"messageTime"];
+//    NSString *targetId = [notification.userInfo objectForKey:@"tId"];
+//    NSString *fromUserId = [notification.userInfo objectForKey:@"fId"];
+    
+    NSMutableDictionary *dic = [notification.userInfo copy];
+    [self.channel invokeMethod:RCMethodCallBackKeyReceiveMessageReadReceipt arguments:dic];
 }
 
 #pragma mark - RCConnectionStatusChangeDelegate

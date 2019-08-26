@@ -44,11 +44,13 @@ class RCMethodCallBackKey {
   static const String SendMessage = 'sendMessageCallBack';
   static const String RefreshUserInfo = 'refreshUserInfoCallBack';
   static const String ReceiveMessage = 'receiveMessageCallBack';
-  static const String ReceiveMessageReceiptResponseCallback = 'receiveMessageReceiptResponseCallback';
   static const String JoinChatRoom = 'joinChatRoomCallBack';
   static const String QuitChatRoom = 'quitChatRoomCallBack';
   static const String UploadMediaProgress = 'uploadMediaProgressCallBack';
   static const String GetRemoteHistoryMessages = 'getRemoteHistoryMessagesCallBack';
   static const String ConnectionStatusChange = 'ConnectionStatusChangeCallBack';
+
+  static const String ReceiveMessageReceiptResponseCallback = 'receiveMessageReceiptResponseCallback';
+  static const String ReceiveMessageReadReceiptCallbackCallback = 'receiveMessageReadReceiptCallback';
 
 }
