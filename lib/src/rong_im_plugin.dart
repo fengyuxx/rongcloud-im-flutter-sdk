@@ -630,7 +630,7 @@ class RongcloudImPlugin {
   /// [status] 消息发送状态，参见枚举 [RCSentStatus]
   ///
   /// [code] 具体的错误码，0 代表成功
-  static Function(int messageId, int status, int code) onMessageSend;
+  static Function(int messageId, int status, int code, String messageUId, Map data) onMessageSend;
 
   ///收到消息的回调
   ///
@@ -687,9 +687,11 @@ class RongcloudImPlugin {
           if (onMessageSend != null) {
             Map argMap = call.arguments;
             int msgId = argMap["messageId"];
+            String msgUId = argMap["messageUId"];
             int status = argMap["status"];
             int code = argMap["code"];
-            onMessageSend(msgId, status, code);
+            Map data = argMap["data"];
+            onMessageSend(msgId, status, code, msgUId, data);
           }
           break;
 
