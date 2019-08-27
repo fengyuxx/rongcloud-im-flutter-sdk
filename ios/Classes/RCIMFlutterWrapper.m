@@ -63,10 +63,10 @@
     
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCRematchCommand class]];
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCExtendCommand class]];
-
-
+    
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleRCLibDispatchReadReceiptNotification:) name:RCLibDispatchReadReceiptNotification object:nil];
-
+    
     return self;
 }
 
@@ -269,8 +269,8 @@
             [self sendMediaMessage:arg result:result];
             return;
         }
-
-
+        
+        
         RCConversationType type = [param[@"conversationType"] integerValue];
         NSString *targetId = param[@"targetId"];
         NSString *contentStr = param[@"content"];
@@ -290,45 +290,23 @@
             result(nil);
             return;
         }
-        RCMessage *message;
+        
         __weak typeof(self) ws = self;
-        if([content isKindOfClass:[RCMediaMessageContent class]]){
-            message = [[RCIMClient sharedRCIMClient] sendMediaMessage:type targetId:targetId content:content pushContent:nil pushData:nil progress:^(int progress, long messageId) {
-                
-            } success:^(long messageId) {
-                [RCLog i:[NSString stringWithFormat:@"%@ success",LOG_TAG]];
-                NSMutableDictionary *dic = [NSMutableDictionary new];
-                [dic setObject:@(messageId) forKey:@"messageId"];
-                [dic setObject:@(SentStatus_SENT) forKey:@"status"];
-                [dic setObject:@(0) forKey:@"code"];
-                [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
-            } error:^(RCErrorCode nErrorCode, long messageId) {
-                [RCLog e:[NSString stringWithFormat:@"%@ %@",LOG_TAG,@(nErrorCode)]];
-                NSMutableDictionary *dic = [NSMutableDictionary new];
-                [dic setObject:@(messageId) forKey:@"messageId"];
-                [dic setObject:@(SentStatus_FAILED) forKey:@"status"];
-                [dic setObject:@(nErrorCode) forKey:@"code"];
-                [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
-            } cancel:^(long messageId) {
-                
-            }];
-        }else{
-            message = [[RCIMClient sharedRCIMClient] sendMessage:type targetId:targetId content:content pushContent:nil pushData:nil success:^(long messageId) {
-                [RCLog i:[NSString stringWithFormat:@"%@ success",LOG_TAG]];
-                NSMutableDictionary *dic = [NSMutableDictionary new];
-                [dic setObject:@(messageId) forKey:@"messageId"];
-                [dic setObject:@(SentStatus_SENT) forKey:@"status"];
-                [dic setObject:@(0) forKey:@"code"];
-                [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
-            } error:^(RCErrorCode nErrorCode, long messageId) {
-                [RCLog e:[NSString stringWithFormat:@"%@ %@",LOG_TAG,@(nErrorCode)]];
-                NSMutableDictionary *dic = [NSMutableDictionary new];
-                [dic setObject:@(messageId) forKey:@"messageId"];
-                [dic setObject:@(SentStatus_FAILED) forKey:@"status"];
-                [dic setObject:@(nErrorCode) forKey:@"code"];
-                [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
-            }];
-        }
+        RCMessage *message = [[RCIMClient sharedRCIMClient] sendMessage:type targetId:targetId content:content pushContent:nil pushData:nil success:^(long messageId) {
+            [RCLog i:[NSString stringWithFormat:@"%@ success",LOG_TAG]];
+            NSMutableDictionary *dic = [NSMutableDictionary new];
+            [dic setObject:@(messageId) forKey:@"messageId"];
+            [dic setObject:@(SentStatus_SENT) forKey:@"status"];
+            [dic setObject:@(0) forKey:@"code"];
+            [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
+        } error:^(RCErrorCode nErrorCode, long messageId) {
+            [RCLog e:[NSString stringWithFormat:@"%@ %@",LOG_TAG,@(nErrorCode)]];
+            NSMutableDictionary *dic = [NSMutableDictionary new];
+            [dic setObject:@(messageId) forKey:@"messageId"];
+            [dic setObject:@(SentStatus_FAILED) forKey:@"status"];
+            [dic setObject:@(nErrorCode) forKey:@"code"];
+            [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
+        }];
         NSString *jsonString = [RCFlutterMessageFactory message2String:message];
         NSMutableDictionary *dic = [NSMutableDictionary new];
         [dic setObject:jsonString forKey:@"message"];
@@ -343,7 +321,7 @@
     RCConversationType type = [param[@"conversationType"] integerValue];
     NSString *targetId = param[@"targetId"];
     NSString *contentStr = param[@"content"];
-    RCMessageContent *content = nil;
+    RCMediaMessageContent *content = nil;
     if([objName isEqualToString:@"RC:ImgMsg"]) {
         NSData *data = [contentStr dataUsingEncoding:NSUTF8StringEncoding];
         NSDictionary *msgDic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
@@ -367,6 +345,8 @@
         [dic setObject:@(progress) forKey:@"progress"];
         [ws.channel invokeMethod:RCMethodCallBackKeyUploadMediaProgress arguments:dic];
     } success:^(long messageId) {
+        RCMediaMessageContent *media = (RCMediaMessageContent *)message.content;
+        NSLog(@"%@", media.remoteUrl);
         NSMutableDictionary *dic = [NSMutableDictionary new];
         [dic setObject:@(messageId) forKey:@"messageId"];
         [dic setObject:@(SentStatus_SENT) forKey:@"status"];
@@ -830,10 +810,10 @@
 
 - (void)handleRCLibDispatchReadReceiptNotification:(NSNotification *)notification{
     NSLog(@"handleRCLibDispatchReadReceiptNotification:");
-//    NSNumber *ctype = [notification.userInfo objectForKey:@"cType"];
-//    NSNumber *time = [notification.userInfo objectForKey:@"messageTime"];
-//    NSString *targetId = [notification.userInfo objectForKey:@"tId"];
-//    NSString *fromUserId = [notification.userInfo objectForKey:@"fId"];
+    //    NSNumber *ctype = [notification.userInfo objectForKey:@"cType"];
+    //    NSNumber *time = [notification.userInfo objectForKey:@"messageTime"];
+    //    NSString *targetId = [notification.userInfo objectForKey:@"tId"];
+    //    NSString *fromUserId = [notification.userInfo objectForKey:@"fId"];
     
     NSMutableDictionary *dic = [notification.userInfo copy];
     [self.channel invokeMethod:RCMethodCallBackKeyReceiveMessageReadReceipt arguments:dic];
@@ -953,7 +933,7 @@
     
     __block UInt64 convertedByteCount = 0;
     __block bool complete = NO;
-
+    
     dispatch_queue_t mediaInputQueue = dispatch_queue_create("mediaInputQueue", NULL);
     [assetWriterInput requestMediaDataWhenReadyOnQueue:mediaInputQueue
                                             usingBlock: ^
@@ -966,12 +946,12 @@
                  NSLog (@"appended a buffer (%zu bytes)",
                         CMSampleBufferGetTotalSampleSize (nextBuffer));
                  convertedByteCount += CMSampleBufferGetTotalSampleSize (nextBuffer);
-
-
+                 
+                 
              } else {
                  [assetWriterInput markAsFinished];
                  [assetWriter finishWritingWithCompletionHandler:^{
-
+                     
                  }];
                  [assetReader cancelReading];
                  NSDictionary *outputFileAttributes = [[NSFileManager defaultManager]
@@ -982,9 +962,9 @@
                  break;
              }
          }
-
+         
      }];
-
+    
     while (complete == NO) {
         [[NSRunLoop currentRunLoop] runMode:NSRunLoopCommonModes beforeDate:[NSDate distantFuture]];
     }
