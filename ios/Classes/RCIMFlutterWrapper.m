@@ -297,7 +297,7 @@
             RCMessage *message = [[RCIMClient sharedRCIMClient] getMessage:messageId];
             NSMutableDictionary *dic = [NSMutableDictionary new];
             [dic setObject:@(messageId) forKey:@"messageId"];
-            [dic setObject:@(message.messageUId) forKey:@"messageUId"];
+            [dic setObject:message.messageUId forKey:@"messageUId"];
             [dic setObject:@(SentStatus_SENT) forKey:@"status"];
             [dic setObject:@(0) forKey:@"code"];
             [dic setObject:@{} forKey:@"data"];
@@ -352,10 +352,10 @@
         RCMediaMessageContent *media = (RCMediaMessageContent *)message.content;
         NSMutableDictionary *dic = [NSMutableDictionary new];
         [dic setObject:@(messageId) forKey:@"messageId"];
-        [dic setObject:@(message.messageUId) forKey:@"messageUId"];
+        [dic setObject:message.messageUId forKey:@"messageUId"];
         [dic setObject:@(SentStatus_SENT) forKey:@"status"];
         [dic setObject:@(0) forKey:@"code"];
-        [dic setObject:@{"remoteUrl": media.remoteUrl} forKey:@"data"];
+        [dic setObject:@{@"remoteUrl": media.remoteUrl} forKey:@"data"];
         [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
     } error:^(RCErrorCode errorCode, long messageId) {
         NSMutableDictionary *dic = [NSMutableDictionary new];
