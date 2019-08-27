@@ -33,6 +33,7 @@ static NSString *RCMethodKeyGetTopConversationList = @"getTopConversationList";
 static NSString *RCMethodKeySetMessageReceivedStatus = @"setMessageReceivedStatus";
 static NSString *RCMethodKeySetMessageSentStatus = @"setMessageSentStatus";
 static NSString *RCMethodKeySendReadReceiptMessage = @"sendReadReceiptMessage";
+static NSString *RCMethodKeyGetConnectionStatus = @"getConnectionStatus";
 
 
 

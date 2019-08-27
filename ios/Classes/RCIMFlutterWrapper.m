@@ -86,6 +86,8 @@
         [self config:call.arguments];
     }else if([RCMethodKeySetServerInfo isEqualToString:call.method]) {
         [self setServerInfo:call.arguments];
+    }else if([RCMethodKeyGetConnectionStatus isEqualToString:call.method]) {
+        [self getConnectionStatus:call.arguments result:result];
     }else if([RCMethodKeyConnect isEqualToString:call.method]) {
         [self connectWithToken:call.arguments result:result];
     }else if([RCMethodKeyDisconnect isEqualToString:call.method]) {
@@ -214,6 +216,12 @@
             result(@(RC_CONN_TOKEN_INCORRECT));
         }];
     }
+}
+
+
+- (void)getConnectionStatus:(id)arg result:(FlutterResult)result {
+    RCConnectionStatus status = [RCIMClient sharedRCIMClient].getConnectionStatus;
+    result(@(status));
 }
 
 - (void)disconnect:(id)arg  {

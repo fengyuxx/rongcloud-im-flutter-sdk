@@ -36,6 +36,15 @@ class RongcloudImPlugin {
     _channel.invokeMethod(RCMethodKey.Config, conf);
   }
 
+  ///获取当前连接状态
+  ///
+  /// [connectionStatus] 连接状态，具体参见枚举 [RCConnectionStatus]
+  static Future<int> getConnectionStatus() async {
+    final int connectionStatus =
+        await _channel.invokeMethod(RCMethodKey.ConnectionStatus);
+    return connectionStatus;
+  }
+
   ///连接 SDK
   ///
   ///[token] 融云 im token

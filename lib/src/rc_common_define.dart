@@ -11,6 +11,7 @@ class RCMethodKey {
   static const String Init = 'init';
   static const String Config = 'config';
   static const String Connect = 'connect';
+  static const String ConnectionStatus = "getConnectionStatus";
   static const String Disconnect = 'disconnect';
   static const String SendMessage = 'sendMessage';
   static const String RefreshUserInfo = 'refreshUserInfo';
