@@ -130,7 +130,7 @@ class _MyAppState extends State<MyApp> {
 
   _addNativeEventHandler() {
     //消息发送结果回调
-    RongcloudImPlugin.onMessageSend = (int messageId,int status,int code) {
+    RongcloudImPlugin.onMessageSend = (int messageId,int status,int code, String messageUId, Map data) {
       print("send message messsageId:"+messageId.toString()+" status:"+status.toString()+" code:"+code.toString());
     };
 
