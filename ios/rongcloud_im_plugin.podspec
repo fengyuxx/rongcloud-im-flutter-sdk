@@ -12,9 +12,10 @@ A new flutter plugin project.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
-  s.public_header_files = 'Classes/**/*.h'
+  s.source_files = 'Classes/**/*', 'Classes/wooplus/**/*'
+  s.public_header_files = 'Classes/**/*.h', 'Classes/wooplus/**/*.h'
   s.static_framework = true
+
   s.dependency 'Flutter'
   s.dependency 'RongCloudIM/IMLib', '~> 2.9.18'
 

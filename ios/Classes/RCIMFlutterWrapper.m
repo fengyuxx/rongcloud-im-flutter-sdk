@@ -265,6 +265,12 @@
     if([arg isKindOfClass:[NSDictionary class]]) {
         NSDictionary *param = (NSDictionary *)arg;
         NSString *objName = param[@"objectName"];
+        if([self isMediaMessage:objName]){
+            [self sendMediaMessage:arg result:result];
+            return;
+        }
+
+
         RCConversationType type = [param[@"conversationType"] integerValue];
         NSString *targetId = param[@"targetId"];
         NSString *contentStr = param[@"content"];
@@ -988,7 +994,8 @@
 #pragma mark - private method
 
 - (BOOL)isMediaMessage:(NSString *)objName {
-    if([objName isEqualToString:@"RC:ImgMsg"]) {
+    if([objName isEqualToString:[RCImageMessage getObjectName]] ||
+       [objName isEqualToString:[RCHQVoiceMessage getObjectName]]) {
         return YES;
     }
     return NO;
