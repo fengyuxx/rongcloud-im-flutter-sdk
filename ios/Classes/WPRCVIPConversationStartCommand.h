@@ -7,6 +7,8 @@
 //
 
 #import "WPRCStatusMessage.h"
+@class WPUserInfo;
 
 @interface WPRCVIPConversationStartCommand : WPRCStatusMessage
+@property (nonatomic, strong) WPUserInfo *user;
 @end

@@ -8,6 +8,7 @@
 
 #import "WPRCMatchNotification.h"
 #import "NSDate+Format.h"
+#import "WPUserInfo.h"
 
 @implementation WPRCMatchNotification
 
@@ -19,6 +20,9 @@
     [dictionay setObject:self.interestIds forKey:@"interest"];
     [dictionay setObject:self.address forKey:@"address"];
     [dictionay setObject:@(self.age) forKey:@"age"];
+    if(self.user){
+        [dictionay setObject:[self.user dictionary] forKey:@"user"];
+    }
     return dictionay;
 }
 
@@ -38,6 +42,8 @@
     self.interestIds = dictionary[@"interest"];
     self.address = dictionary[@"address"];
     self.age = [dictionary[@"age"] integerValue];
+    
+    self.user = [[WPUserInfo alloc] initWithDictionary:dictionary[@"user"]];
 }
 
 /*!

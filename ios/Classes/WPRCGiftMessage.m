@@ -7,6 +7,7 @@
 //
 
 #import "WPRCGiftMessage.h"
+#import "WPUserInfo.h"
 
 @implementation WPRCGiftMessage
 
@@ -37,6 +38,10 @@
         if(self.content) [dictionay setObject:self.content forKey:@"content"];
         [dictionay setObject:@(self.opened ? 1 : 0) forKey:@"opened"];
         [dictionay setObject:gift forKey:@"gift"];
+    }
+    
+    if(self.user){
+        [dictionay setObject:[self.user dictionary] forKey:@"user"];
     }
     return dictionay;
 }
@@ -74,6 +79,8 @@
     }else if(self.giftId != nil && [self.giftId isEqualToString:self.commodity.commodityId]){
         self.commodity.commodityId = nil;
     }
+    
+    self.user = [[WPUserInfo alloc] initWithDictionary:dictionary[@"user"]];
 }
 
 /**

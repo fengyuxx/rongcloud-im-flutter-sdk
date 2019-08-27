@@ -7,6 +7,7 @@
 //
 
 #import "WPRCMessageContent.h"
+@class WPUserInfo;
 @class WPRCGiftCommodity;
 
 @interface WPRCGiftMessage : WPRCMessageContent
@@ -14,6 +15,8 @@
 @property (nonatomic, strong) NSString *content;
 @property (nonatomic, strong) WPRCGiftCommodity *commodity;
 @property (nonatomic, assign) BOOL opened;
+
+@property (nonatomic, strong) WPUserInfo *user;
 @end
 
 
