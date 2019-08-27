@@ -294,10 +294,13 @@
         __weak typeof(self) ws = self;
         RCMessage *message = [[RCIMClient sharedRCIMClient] sendMessage:type targetId:targetId content:content pushContent:nil pushData:nil success:^(long messageId) {
             [RCLog i:[NSString stringWithFormat:@"%@ success",LOG_TAG]];
+            RCMessage *message = [[RCIMClient sharedRCIMClient] getMessage:messageId];
             NSMutableDictionary *dic = [NSMutableDictionary new];
             [dic setObject:@(messageId) forKey:@"messageId"];
+            [dic setObject:@(message.messageUId) forKey:@"messageUId"];
             [dic setObject:@(SentStatus_SENT) forKey:@"status"];
             [dic setObject:@(0) forKey:@"code"];
+            [dic setObject:@{} forKey:@"data"];
             [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
         } error:^(RCErrorCode nErrorCode, long messageId) {
             [RCLog e:[NSString stringWithFormat:@"%@ %@",LOG_TAG,@(nErrorCode)]];
@@ -345,12 +348,14 @@
         [dic setObject:@(progress) forKey:@"progress"];
         [ws.channel invokeMethod:RCMethodCallBackKeyUploadMediaProgress arguments:dic];
     } success:^(long messageId) {
+        RCMessage *message = [[RCIMClient sharedRCIMClient] getMessage:messageId];
         RCMediaMessageContent *media = (RCMediaMessageContent *)message.content;
-        NSLog(@"%@", media.remoteUrl);
         NSMutableDictionary *dic = [NSMutableDictionary new];
         [dic setObject:@(messageId) forKey:@"messageId"];
+        [dic setObject:@(message.messageUId) forKey:@"messageUId"];
         [dic setObject:@(SentStatus_SENT) forKey:@"status"];
         [dic setObject:@(0) forKey:@"code"];
+        [dic setObject:@{"remoteUrl": media.remoteUrl} forKey:@"data"];
         [ws.channel invokeMethod:RCMethodCallBackKeySendMessage arguments:dic];
     } error:^(RCErrorCode errorCode, long messageId) {
         NSMutableDictionary *dic = [NSMutableDictionary new];
