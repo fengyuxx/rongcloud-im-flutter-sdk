@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'conversation.dart';
@@ -97,7 +98,12 @@ class RongcloudImPlugin {
   ///
   ///[content] 消息内容 参见 [MessageContent]
   static Future<Message> sendMessage(
-      int conversationType, String targetId, MessageContent content) async {
+    int conversationType,
+    String targetId,
+    MessageContent content, {
+    String pushContent,
+    Map<String, dynamic> pushData,
+  }) async {
     String jsonStr = content.encode();
     String objName = content.getObjectName();
     Map map = {
@@ -106,6 +112,12 @@ class RongcloudImPlugin {
       "content": jsonStr,
       "objectName": objName
     };
+    if(pushContent != null){
+      map["pushContent"] = pushContent;
+    }
+    if(pushData != null){
+      map['pushData'] = json.encode(pushData);
+    }
     Map resultMap = await _channel.invokeMethod(RCMethodKey.SendMessage, map);
     if (resultMap == null) {
       return null;
@@ -630,7 +642,9 @@ class RongcloudImPlugin {
   /// [status] 消息发送状态，参见枚举 [RCSentStatus]
   ///
   /// [code] 具体的错误码，0 代表成功
-  static Function(int messageId, int status, int code, String messageUId, Map data) onMessageSend;
+  static Function(
+          int messageId, int status, int code, String messageUId, Map data)
+      onMessageSend;
 
   ///收到消息的回调
   ///

@@ -270,11 +270,12 @@
             return;
         }
         
-        
         RCConversationType type = [param[@"conversationType"] integerValue];
         NSString *targetId = param[@"targetId"];
         NSString *contentStr = param[@"content"];
         NSData *data = [contentStr dataUsingEncoding:NSUTF8StringEncoding];
+        NSString *pushContent = param[@"pushContent"];
+        NSString *pushData = param[@"pushData"];
         Class clazz = [[RCMessageMapper sharedMapper] messageClassWithTypeIdenfifier:objName];
         
         RCMessageContent *content = nil;
@@ -292,7 +293,7 @@
         }
         
         __weak typeof(self) ws = self;
-        RCMessage *message = [[RCIMClient sharedRCIMClient] sendMessage:type targetId:targetId content:content pushContent:nil pushData:nil success:^(long messageId) {
+        RCMessage *message = [[RCIMClient sharedRCIMClient] sendMessage:type targetId:targetId content:content pushContent:pushContent pushData:pushData success:^(long messageId) {
             [RCLog i:[NSString stringWithFormat:@"%@ success",LOG_TAG]];
             RCMessage *message = [[RCIMClient sharedRCIMClient] getMessage:messageId];
             NSMutableDictionary *dic = [NSMutableDictionary new];
@@ -324,6 +325,8 @@
     RCConversationType type = [param[@"conversationType"] integerValue];
     NSString *targetId = param[@"targetId"];
     NSString *contentStr = param[@"content"];
+    NSString *pushContent = param[@"pushContent"];
+    NSString *pushData = param[@"pushData"];
     RCMediaMessageContent *content = nil;
     if([objName isEqualToString:@"RC:ImgMsg"]) {
         NSData *data = [contentStr dataUsingEncoding:NSUTF8StringEncoding];
@@ -342,7 +345,7 @@
     }
     
     __weak typeof(self) ws = self;
-    RCMessage *message =  [[RCIMClient sharedRCIMClient] sendMediaMessage:type targetId:targetId content:content pushContent:nil pushData:nil progress:^(int progress, long messageId) {
+    RCMessage *message =  [[RCIMClient sharedRCIMClient] sendMediaMessage:type targetId:targetId content:content pushContent:pushContent pushData:pushData progress:^(int progress, long messageId) {
         NSMutableDictionary *dic = [NSMutableDictionary new];
         [dic setObject:@(messageId) forKey:@"messageId"];
         [dic setObject:@(progress) forKey:@"progress"];
