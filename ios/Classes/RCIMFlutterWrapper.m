@@ -33,6 +33,7 @@
 @end
 
 @interface RCIMFlutterWrapper ()<RCIMClientReceiveMessageDelegate,RCConnectionStatusChangeDelegate>{
+    bool initialized;
     NSString *_pushToken;
 }
 @property (nonatomic, strong) FlutterMethodChannel *channel;
@@ -51,24 +52,25 @@
 
 - (instancetype)init{
     self = [super init];
+    initialized = false;
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCGiftMessage class]];
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCFeedbackMessage class]];
-    
+
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCGiftOpenNotification class]];
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCMatchNotification class]];
-    
+
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCGiftOpenCommand class]];
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCVIPConversationStartCommand class]];
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCKickoutCommand class]];
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCUserDeletedCommand class]];
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCUnmatchCommand class]];
-    
+
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCRematchCommand class]];
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCExtendCommand class]];
-    
-    
+
+
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleRCLibDispatchReadReceiptNotification:) name:RCLibDispatchReadReceiptNotification object:nil];
-    
+
     return self;
 }
 
@@ -143,13 +145,15 @@
     }else {
         result(FlutterMethodNotImplemented);
     }
-    
+
 }
 
 
 - (void)setPushToken:(NSString *)pushToken{
     _pushToken = pushToken;
-    [[RCIMClient sharedRCIMClient] setDeviceToken:pushToken];
+    if(initialized){
+        [[RCIMClient sharedRCIMClient] setDeviceToken:pushToken];
+    }
 }
 
 #pragma mark - selector
@@ -159,10 +163,12 @@
     if([arg isKindOfClass:[NSString class]]) {
         NSString *appkey = (NSString *)arg;
         [[RCIMClient sharedRCIMClient] initWithAppKey:appkey];
-        
+
         [[RCIMClient sharedRCIMClient] setReceiveMessageDelegate:self object:nil];
         [[RCIMClient sharedRCIMClient] setRCConnectionStatusChangeDelegate:self];
-        [[RCIMClient sharedRCIMClient] setDeviceToken:_pushToken];
+        if(_pushToken != nil){
+            [[RCIMClient sharedRCIMClient] setDeviceToken:_pushToken];
+        }
     }else {
         NSLog(@"init 非法参数类型");
     }
