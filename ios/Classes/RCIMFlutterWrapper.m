@@ -32,7 +32,9 @@
 - (RCMessageContent *)messageContentWithClass:(Class)messageClass fromData:(NSData *)jsonData;
 @end
 
-@interface RCIMFlutterWrapper ()<RCIMClientReceiveMessageDelegate,RCConnectionStatusChangeDelegate>
+@interface RCIMFlutterWrapper ()<RCIMClientReceiveMessageDelegate,RCConnectionStatusChangeDelegate>{
+    NSString *_pushToken;
+}
 @property (nonatomic, strong) FlutterMethodChannel *channel;
 @property (nonatomic, strong) RCFlutterConfig *config;
 @end
@@ -145,7 +147,10 @@
 }
 
 
-
+- (void)setPushToken:(NSString *)pushToken{
+    _pushToken = pushToken;
+    [[RCIMClient sharedRCIMClient] setDeviceToken:pushToken];
+}
 
 #pragma mark - selector
 - (void)initWithRCIMAppKey:(id)arg {
@@ -157,6 +162,7 @@
         
         [[RCIMClient sharedRCIMClient] setReceiveMessageDelegate:self object:nil];
         [[RCIMClient sharedRCIMClient] setRCConnectionStatusChangeDelegate:self];
+        [[RCIMClient sharedRCIMClient] setDeviceToken:_pushToken];
     }else {
         NSLog(@"init 非法参数类型");
     }

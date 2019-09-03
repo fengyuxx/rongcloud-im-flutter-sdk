@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)sharedWrapper;
 - (void)addFlutterChannel:(FlutterMethodChannel *)channel;
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
+- (void)setPushToken:(NSString *)pushToken;
 @end
 
 NS_ASSUME_NONNULL_END

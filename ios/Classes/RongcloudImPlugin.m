@@ -1,6 +1,5 @@
 #import "RongcloudImPlugin.h"
 #import "RCIMFlutterWrapper.h"
-#import <RongIMLib/RongIMLib.h>
 
 @implementation RongcloudImPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
@@ -22,7 +21,7 @@
     token = [token stringByReplacingOccurrencesOfString:@" " withString:@""];
     token = [token stringByReplacingOccurrencesOfString:@"<" withString:@""];
     token = [token stringByReplacingOccurrencesOfString:@">" withString:@""];
-    [[RCIMClient sharedRCIMClient] setDeviceToken:token];
+    [[RCIMFlutterWrapper sharedWrapper] setPushToken:token];
 }
 
 @end
