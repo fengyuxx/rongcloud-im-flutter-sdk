@@ -33,7 +33,6 @@
 @end
 
 @interface RCIMFlutterWrapper ()<RCIMClientReceiveMessageDelegate,RCConnectionStatusChangeDelegate>{
-    bool initialized;
     NSString *_pushToken;
 }
 @property (nonatomic, strong) FlutterMethodChannel *channel;
@@ -52,7 +51,6 @@
 
 - (instancetype)init{
     self = [super init];
-    initialized = false;
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCGiftMessage class]];
     [[RCIMClient sharedRCIMClient] registerMessageType:[WPRCFeedbackMessage class]];
 
@@ -150,10 +148,9 @@
 
 
 - (void)setPushToken:(NSString *)pushToken{
+    if([pushToken isEqualToString:_pushToken]) return;
     _pushToken = pushToken;
-    if(initialized){
-        [[RCIMClient sharedRCIMClient] setDeviceToken:pushToken];
-    }
+    [[RCIMClient sharedRCIMClient] setDeviceToken:pushToken];
 }
 
 #pragma mark - selector
@@ -184,7 +181,7 @@
         self.config = config;
         NSLog(@"RCFlutterConfig %@",conf);
         [self updateIMConfig];
-        
+
     }else {
         NSLog(@"RCFlutterConfig 非法参数类型");
     }
@@ -281,13 +278,13 @@
             [self sendMediaMessage:arg result:result];
             return;
         }
-        
+
         RCConversationType type = [param[@"conversationType"] integerValue];
         NSString *targetId = param[@"targetId"];
         NSString *contentStr = param[@"content"];
         NSData *data = [contentStr dataUsingEncoding:NSUTF8StringEncoding];
         NSString *pushContent = param[@"pushContent"];
-        NSString *pushData = param[@"pushData"];
+        NSString *pushData = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:param[@"pushData"] options:kNilOptions error:nil] encoding:NSUTF8StringEncoding];
         Class clazz = [[RCMessageMapper sharedMapper] messageClassWithTypeIdenfifier:objName];
         
         RCMessageContent *content = nil;
