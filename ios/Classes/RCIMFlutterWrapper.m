@@ -307,7 +307,7 @@
             RCMessage *message = [[RCIMClient sharedRCIMClient] getMessage:messageId];
             NSMutableDictionary *dic = [NSMutableDictionary new];
             [dic setObject:@(messageId) forKey:@"messageId"];
-            [dic setObject:message.messageUId forKey:@"messageUId"];
+            if(message.messageUId) [dic setObject:message.messageUId forKey:@"messageUId"];
             [dic setObject:@(SentStatus_SENT) forKey:@"status"];
             [dic setObject:@(0) forKey:@"code"];
             [dic setObject:@{} forKey:@"data"];
@@ -364,7 +364,7 @@
         RCMediaMessageContent *media = (RCMediaMessageContent *)message.content;
         NSMutableDictionary *dic = [NSMutableDictionary new];
         [dic setObject:@(messageId) forKey:@"messageId"];
-        [dic setObject:message.messageUId forKey:@"messageUId"];
+        if(message.messageUId) [dic setObject:message.messageUId forKey:@"messageUId"];
         [dic setObject:@(SentStatus_SENT) forKey:@"status"];
         [dic setObject:@(0) forKey:@"code"];
         [dic setObject:@{@"remoteUri": media.remoteUrl} forKey:@"data"];
